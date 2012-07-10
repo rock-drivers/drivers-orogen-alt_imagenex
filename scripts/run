@@ -1,0 +1,49 @@
+#! /usr/bin/env ruby
+#
+require 'orocos'
+require 'optparse'
+Orocos.initialize
+
+gui = false
+optparse = OptionParser.new do |opt|
+    opt.banner = "run [--gui] DEVICE"
+    opt.on '--gui', "starts the Rock task inspection widget on the running task" do
+        gui = true
+    end
+end
+io_port = *optparse.parse(ARGV)
+if !io_port
+    puts optparse
+    exit 1
+end
+
+if gui
+    require 'vizkit'
+end
+
+Orocos.run 'alt_imagenex::Task' => 'alt' do
+    Orocos.logger.level = Logger::DEBUG
+    Orocos.log_all
+    puts "deployed the alt_imagenex::Task task"
+
+    alt = Orocos::TaskContext.get 'alt'
+    alt.io_port = io_port
+    alt.io_read_timeout = Time.at(2);
+    alt.configure
+    alt.start
+
+    if gui
+        task_inspector = Vizkit.default_loader.task_inspector
+        task_inspector.config(alt)
+        task_inspector.show
+        Vizkit.exec
+    else
+	reader = alt.alt_samples.reader
+        Orocos.watch(alt) do
+            if sample = reader.read
+                pp sample
+            end
+        end
+    end
+end
+

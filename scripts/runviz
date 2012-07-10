@@ -1,0 +1,71 @@
+#! /usr/bin/env ruby
+#
+require 'orocos'
+require 'vizkit'
+require 'optparse'
+Orocos.initialize
+
+gui = false
+optparse = OptionParser.new do |opt|
+    opt.banner = "run [--gui] DEVICE"
+    opt.on '--gui', "starts the Rock task inspection widget on the running task" do
+        gui = true
+    end
+end
+io_port = *optparse.parse(ARGV)
+if !io_port
+    puts optparse
+    exit 1
+end
+
+Orocos.run 'alt_imagenex::Task' => 'alt' do
+    Orocos.logger.level = Logger::DEBUG
+    Orocos.log_all
+    puts "deployed the alt_imagenex::Task task"
+
+    alt = Orocos::TaskContext.get 'alt'
+    alt.io_port = io_port
+    alt.io_read_timeout = Time.at(2);
+    alt.configure
+    alt.start
+
+    if gui
+        task_inspector = Vizkit.default_loader.task_inspector
+        task_inspector.config(alt)
+        task_inspector.show
+	guiviz = Vizkit.load 'scripts/alt.ui'
+	
+	writer = alt.gain.writer
+	  guiviz.slGain.connect(SIGNAL('valueChanged(int)')) do 
+	  sample = writer.new_sample
+	  sample = guiviz.slGain.value
+	  writer.write sample
+	end
+	
+	writer1 = alt.range.writer
+	  guiviz.slRange.connect(SIGNAL('valueChanged(int)')) do 
+	  sample = writer1.new_sample
+	  sample = guiviz.slRange.value
+	  writer1.write sample
+	end
+	
+	alt.alt_samples.connect_to do |data,_|
+           guiviz.edAltitude.setText data.altitude.to_s
+        end
+	
+	alt.alt_status.connect_to do |data,_|
+           guiviz.edRange.setText data.range.to_s
+        end
+	
+	guiviz.show
+        Vizkit.exec
+    else
+	reader = alt.alt_samples.reader
+        Orocos.watch(alt) do
+            if sample = reader.read
+                pp sample
+            end
+        end
+    end
+end
+

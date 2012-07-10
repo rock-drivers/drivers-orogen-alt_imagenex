@@ -1,0 +1,18 @@
+<package>
+  <description brief="orogen integration of Imagenex Altimeter">
+  
+  </description>
+  <author>Sitta Buhmann/sbuhmann@marum.de</author>
+  <license></license>
+  <url>http://</url>
+  <logo>http://</logo>
+  <!--
+   To add any dependencies use the depend tag
+  <depend package="dummy-dependency-0" />
+	...
+  <depend package="dummy-dependency-n-1" />
+  <depend package="dummy-dependency-n" />
+  -->
+  <depend package="drivers/orogen/iodrivers_base" />
+  <depend package="drivers/alt_imagenex" />
+</package>

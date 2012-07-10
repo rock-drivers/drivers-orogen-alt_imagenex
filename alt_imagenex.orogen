@@ -1,0 +1,47 @@
+name "alt_imagenex"
+# Optionally declare the version number
+# version "0.1"
+
+using_library "alt_imagenex"
+import_types_from "alt_imagenex/AltTypes.hpp"
+import_types_from "act_schilling/Error.hpp"
+
+using_library "aggregator"
+import_types_from 'aggregator'
+
+using_task_library "iodrivers_base"
+
+# Declare a new task context (i.e., a component)
+#
+# The corresponding C++ class can be edited in tasks/Task.hpp and
+# tasks/Task.cpp, and will be put in the alt_imagenex namespace.
+
+task_context "Task" do
+    subclasses "iodrivers_base::Task"
+    #needs_configuration
+    
+    error_states :COMM_ERROR
+    
+    #property "config", "alt_imagenex/Config"
+    
+    output_port("alt_samples", "alt_imagenex/AltData")
+    output_port("alt_status", "alt_imagenex/AltStatus")
+    output_port('log_message', 'oro_marum/LogMessage').
+        doc 'TextMessage with different priority levels'
+    input_port('gain', 'int').
+        doc "set start gain"
+    input_port('range', 'int').
+        doc "set range"
+    periodic(0.01)
+end
+
+
+# Declares a deployment, i.e. an actual executable that contains various tasks.
+deployment "alt_imagenex_test" do
+    # This is a test deployment that should not be installed
+    do_not_install
+
+    # Declares it as periodic, with a period of 100ms
+    task("alt_imagenex", "alt_imagenex::Task")
+    add_default_logger
+end

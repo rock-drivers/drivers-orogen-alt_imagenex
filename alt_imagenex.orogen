@@ -23,9 +23,12 @@ task_context "Task" do
     error_states :COMM_ERROR
     
     #property "config", "alt_imagenex/Config"
+    property('echo_on','bool')
+    property('sound_velocity','double')
     
     output_port("alt_samples", "alt_imagenex/AltData")
     output_port("alt_status", "alt_imagenex/AltStatus")
+    output_port("alt_echo", "base::samples::SonarBeam")
     output_port('log_message', 'oro_marum/LogMessage').
         doc 'TextMessage with different priority levels'
     input_port('gain', 'int').

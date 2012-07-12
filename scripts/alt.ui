@@ -113,6 +113,19 @@
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QLineEdit" name="edGain">
+   <property name="geometry">
+    <rect>
+     <x>316</x>
+     <y>84</y>
+     <width>53</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

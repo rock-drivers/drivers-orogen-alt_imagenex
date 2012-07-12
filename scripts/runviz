@@ -12,8 +12,9 @@ optparse = OptionParser.new do |opt|
         gui = true
     end
 end
-io_port = *optparse.parse(ARGV)
-if !io_port
+
+dev_id = *optparse.parse(ARGV)
+if !dev_id
     puts optparse
     exit 1
 end
@@ -24,8 +25,8 @@ Orocos.run 'alt_imagenex::Task' => 'alt' do
     puts "deployed the alt_imagenex::Task task"
 
     alt = Orocos::TaskContext.get 'alt'
-    alt.io_port = io_port
     alt.io_read_timeout = Time.at(2);
+    Orocos.apply_conf_file(alt, 'alt.yml', [dev_id])
     alt.configure
     alt.start
 
@@ -40,6 +41,7 @@ Orocos.run 'alt_imagenex::Task' => 'alt' do
 	  sample = writer.new_sample
 	  sample = guiviz.slGain.value
 	  writer.write sample
+	  guiviz.edGain.setText sample.to_s
 	end
 	
 	writer1 = alt.range.writer

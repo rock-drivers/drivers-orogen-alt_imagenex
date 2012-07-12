@@ -1,0 +1,14 @@
+--- name:alti
+# no documentation available for this property
+echo_on: 0
+# no documentation available for this property
+io_port: tcp://192.168.0.6:4040
+# the timeout on read. Defaults to one second
+io_read_timeout: 
+  microseconds: 2000000
+# the interval at which the status port should be written. Defaults to one second
+io_status_interval: 
+  microseconds: 1000000
+# the timeout on write. Defaults to one second. Used only in direct I/O mode
+io_write_timeout: 
+  microseconds: 1000000

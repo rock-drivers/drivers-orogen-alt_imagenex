@@ -33,6 +33,8 @@ bool Task::configureHook()
       mDriver = new alt_imagenex::Driver;
       if (!_io_port.get().empty())
       {
+	  mDriver->setEcho(_echo_on.get());
+	  mDriver->setSoundVelocity(_sound_velocity.get());
 	  mDriver->open(_io_port.get());
       }
   
@@ -75,6 +77,9 @@ void Task::updateHook()
       mDriver->collectData();
       _alt_samples.write(mDriver->getData());
       _alt_status.write(mDriver->getStatus());
+      if(_echo_on.get()){
+	_alt_echo.write(mDriver->getEchoData());
+      }
       TaskBase::updateHook();
     } catch(std::runtime_error &e){
       LOG_DEBUG("exception %s",e.what());

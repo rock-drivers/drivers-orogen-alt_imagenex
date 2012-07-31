@@ -1,6 +1,6 @@
 --- name:alti
 # no documentation available for this property
-echo_on: 0
+echo_on: 1
 # no documentation available for this property
 io_port: tcp://192.168.0.6:4040
 # the timeout on read. Defaults to one second

@@ -59,6 +59,21 @@ Orocos.run 'alt_imagenex::Task' => 'alt' do
            guiviz.edRange.setText data.range.to_s
         end
 	
+	#widget = Vizkit.default_loader.Plot2d
+	#Vizkit.display alt.alt_echo,:widget => widget,:beam => [:field]
+	#widget.show
+	
+	#widget = Vizkit.default_loader.SonarView
+	#alt.alt_echo.connect_to do |data,_|
+          #widget.paintLine(1, data.beam,500)
+	  #widget.setSonarScan(data.beam,500,1,1)
+	#end
+	#widget = Vizkit.default_loader.RangeView
+	#alt.alt_echo.connect_to do |data,_|
+	#  widget.setRangeScan(data.beam.to_f,500)
+	#end
+	#widget.show
+	
 	guiviz.show
         Vizkit.exec
     else

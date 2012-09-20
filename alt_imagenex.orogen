@@ -4,7 +4,7 @@ name "alt_imagenex"
 
 using_library "alt_imagenex"
 import_types_from "alt_imagenex/AltTypes.hpp"
-import_types_from "act_schilling/Error.hpp"
+import_types_from "base_schilling/Error.hpp"
 
 using_library "aggregator"
 import_types_from 'aggregator'

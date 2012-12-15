@@ -5,10 +5,6 @@ name "alt_imagenex"
 using_library "alt_imagenex"
 import_types_from "alt_imagenex/AltTypes.hpp"
 import_types_from "base_schilling/Error.hpp"
-
-using_library "aggregator"
-import_types_from 'aggregator'
-
 using_task_library "iodrivers_base"
 
 # Declare a new task context (i.e., a component)

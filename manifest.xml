@@ -5,6 +5,6 @@
   <license></license>
   <depend package="drivers/orogen/iodrivers_base" />
   <depend package="drivers/alt_imagenex" />
-  <depend package="drivers/act_schilling" />
+  <depend package="drivers/base_schilling" />
   <tags>underwater</tags>
 </package>

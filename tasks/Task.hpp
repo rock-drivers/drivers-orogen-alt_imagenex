@@ -104,6 +104,9 @@ namespace alt_imagenex {
          * before calling start() again.
          */
          void cleanupHook();
+    protected:	 
+	 void processIO();
+	 void run();
     };
 }
 

@@ -2,8 +2,10 @@
 
 #include "Task.hpp"
 #include <base/logging.h>
+#include <base_schilling/Error.hpp>
 
 using namespace alt_imagenex;
+using namespace oro_marum;
 
 Task::Task(std::string const& name)
     : TaskBase(name),mDriver(0)
@@ -29,15 +31,15 @@ Task::~Task()
 
 bool Task::configureHook()
 {
-    try{delete mDriver;
+    try{
+      delete mDriver;
       mDriver = new alt_imagenex::Driver;
+      mDriver->setEcho(_echo_on.get());
+      mDriver->setSoundVelocity(_sound_velocity.get());
       if (!_io_port.get().empty())
       {
-	  mDriver->setEcho(_echo_on.get());
-	  mDriver->setSoundVelocity(_sound_velocity.get());
 	  mDriver->open(_io_port.get());
       }
-  
       setDriver(mDriver);
   
       if (! TaskBase::configureHook())
@@ -45,52 +47,28 @@ bool Task::configureHook()
       return true;
     } catch(std::runtime_error &e){
       LOG_DEBUG("exception %s",e.what());
-      error(COMM_ERROR);      
-      return false;
+      _log_message.write(LogMessage(e));
+      throw e;
     } 
 }
 
 
 bool Task::startHook()
 {
-    try{
-      if (! TaskBase::startHook())
-	  return false;
-      return true;
-    } catch(std::runtime_error &e){
-      LOG_DEBUG("exception %s",e.what());
-      error(COMM_ERROR);      
-      return false;
-    }
+  if (! TaskBase::startHook())
+    return false;
+  return true;
 }
 
 void Task::updateHook()
-{
-    try{
-      int val;
-      if (_gain.read(val) == RTT::NewData) {
-	mDriver->setGain(val);
-      }      
-      if (_range.read(val) == RTT::NewData) {
-	mDriver->setRange(val);
-      }
-      mDriver->collectData();
-      _alt_samples.write(mDriver->getData());
-      _alt_status.write(mDriver->getStatus());
-      if(_echo_on.get()){
-	_alt_echo.write(mDriver->getEchoData());
-      }
-      TaskBase::updateHook();
-    } catch(std::runtime_error &e){
-      LOG_DEBUG("exception %s",e.what());
-      error(COMM_ERROR);      
-    }
+{	
+  run();
 }
 
 void Task::errorHook()
 {
-    TaskBase::errorHook();
-    recover();
+  run();  
+  TaskBase::errorHook();
 }
 
 void Task::stopHook()
@@ -106,3 +84,51 @@ void Task::cleanupHook()
   TaskBase::cleanupHook();
 }
 
+void Task::processIO()
+{
+  int val;
+  if (_gain.read(val) == RTT::NewData) {
+    mDriver->setGain(val);
+  }      
+  if (_range.read(val) == RTT::NewData) {
+    mDriver->setRange(val);
+  }
+  mDriver->collectData();
+  _alt_samples.write(mDriver->getData());
+  AltStatus status = mDriver->getStatus(); 
+  _alt_status.write(status);
+  if(_echo_on.get()){
+    _alt_echo.write(mDriver->getEchoData());
+  }
+  if(!status.serialStatus){
+    _log_message.write(LogMessage(Error,ALTSTR_SERIAL,ALTALARM_SERIAL));
+    error(DEV_ERROR);
+  }
+  else{
+    if(DEV_ERROR == state()){
+      recover();
+    }
+  }
+}
+
+void Task::run()
+{
+    try{
+      switch(state()){
+	case RUNNING: {
+	  processIO();
+	  state(MONITORING);
+	  break;
+	}
+	case MONITORING:{
+	  processIO();
+	  break;
+	}
+	default: break;
+      }   
+    } catch(std::runtime_error &e){
+      LOG_DEBUG("exception %s",e.what());
+      _log_message.write(LogMessage(e));
+      exception(IO_TIMEOUT);
+    }
+}
